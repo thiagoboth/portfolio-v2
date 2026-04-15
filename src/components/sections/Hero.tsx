@@ -20,15 +20,12 @@ const easeInOutQuart = (t: number) =>
    ══════════════════════════════════════════════════════════════ */
 function MouseCursorIcon() {
   return (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Fundo azul arredondado */}
-      <rect x="0.5" y="0.5" width="35" height="35" rx="8" fill="#2D8CFF" />
-      <rect x="0.5" y="0.5" width="35" height="35" rx="8" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
-      {/* Seta cursor branca */}
-      <path
-        d="M11 7L11 27.5L16.5 22L21 30.5L24.5 29L20 20.5H27L11 7Z"
-        fill="white"
-      />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+      <path d="M5.45 2.65L19.76 11.66C20.66 12.23 20.47 13.63 19.42 13.86L13.93 15.05C13.51 15.14 13.16 15.45 12.99 15.85L10.68 21.05C10.24 22.05 8.72 22.06 8.26 21.07L5.45 2.65Z"
+        stroke="#FFFFFF"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round" />
     </svg>
   )
 }
@@ -92,61 +89,49 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
   const cursorOpacity = useMotionValue(0)
   const cursorScale = useMotionValue(1)
 
-  // ── Cached element positions ──────────────────────────────
-  const positionsRef = useRef<TargetPositions | null>(null)
-  const [positionsReady, setPositionsReady] = useState(false)
-
-  const computePositions = useCallback(() => {
-    const ctaEl = ctaGroupRef.current
-    const socialsEl = socialsGroupRef.current
-    if (!ctaEl || !socialsEl) return
-
-    const ctaRect = ctaEl.getBoundingClientRect()
-    const socialsRect = socialsEl.getBoundingClientRect()
-
-    positionsRef.current = {
-      ctaCenter: {
-        x: ctaRect.left - 20,
-        y: ctaRect.top + ctaRect.height / 2 - 10,
-      },
-      ctaTrash: {
-        // Trash está em: right do inset(-4px) do frame, top - 22px
-        x: ctaRect.left + ctaRect.width + 4 - 14,
-        y: ctaRect.top - 4 - 22 + 4,
-      },
-      socialsCenter: {
-        x: socialsRect.left - 20,
-        y: socialsRect.top + socialsRect.height / 2 - 10,
-      },
-      socialsTrash: {
-        x: socialsRect.left + socialsRect.width + 4 - 14,
-        y: socialsRect.top - 4 - 22 + 4,
-      },
-    }
-    setPositionsReady(true)
-  }, [])
-
-  // Compute after entrance animations finish + on resize
-  useEffect(() => {
-    const timer = setTimeout(computePositions, 1800)
-    window.addEventListener('resize', computePositions)
-    return () => {
-      clearTimeout(timer)
-      window.removeEventListener('resize', computePositions)
-    }
-  }, [computePositions])
-
   // ── Scroll-driven cursor animation ────────────────────────
   useEffect(() => {
-    if (!positionsReady) return
-
-    const startX = -100
-    const pos = positionsRef.current!
+    let cachedCtaRect: DOMRect | null = null
+    let cachedSocialsRect: DOMRect | null = null
 
     return scrollYProgress.on('change', (v) => {
       // ══ VISIBILITY — bidirecional ══
       setCtaVisible(v < 0.060)
       setSocialsVisible(v < 0.092)
+
+      const ctaEl = ctaGroupRef.current
+      const socialsEl = socialsGroupRef.current
+
+      // getBoundingClientRect() gets the real transformed position!
+      if (ctaEl) cachedCtaRect = ctaEl.getBoundingClientRect()
+      if (socialsEl) cachedSocialsRect = socialsEl.getBoundingClientRect()
+
+      if (!cachedCtaRect || !cachedSocialsRect) return
+
+      // SVG Hotspot (tip of the arrow) offset
+      const HOTSPOT_X = 5.5
+      const HOTSPOT_Y = 2.7
+
+      const pos = {
+        ctaCenter: {
+          x: cachedCtaRect.left + cachedCtaRect.width / 2 - HOTSPOT_X,
+          y: cachedCtaRect.top + cachedCtaRect.height / 2 - HOTSPOT_Y,
+        },
+        ctaTrash: {
+          x: cachedCtaRect.right - 5 - HOTSPOT_X,
+          y: cachedCtaRect.top - 16 - HOTSPOT_Y,
+        },
+        socialsCenter: {
+          x: cachedSocialsRect.left + cachedSocialsRect.width / 2 - HOTSPOT_X,
+          y: cachedSocialsRect.top + cachedSocialsRect.height / 2 - HOTSPOT_Y,
+        },
+        socialsTrash: {
+          x: cachedSocialsRect.right - 5 - HOTSPOT_X,
+          y: cachedSocialsRect.top - 16 - HOTSPOT_Y,
+        },
+      }
+
+      const startX = -100
 
       // ══ RESET all states before applying current phase ══
       let _showCursor = false
@@ -187,14 +172,14 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
         const t = clamp01((v - 0.048) / 0.012)
         const easedT = easeInOutQuart(t)
 
+        const arcY = Math.sin(t * Math.PI) * -12 // Arco natural pro lixo
         cursorX.set(lerp(pos.ctaCenter.x, pos.ctaTrash.x, easedT))
-        cursorY.set(lerp(pos.ctaCenter.y, pos.ctaTrash.y, easedT))
+        cursorY.set(lerp(pos.ctaCenter.y, pos.ctaTrash.y, easedT) + arcY)
 
-        // Trash hover na metade final do percurso
-        _ctaTrashHovered = t > 0.5
-        // Click squeeze + cor vermelha no final
-        _ctaTrashClicked = t > 0.9
-        cursorScale.set(t > 0.9 ? lerp(1, 0.7, (t - 0.9) / 0.1) : 1)
+        // Hover mais natural só quando chega pertinho
+        _ctaTrashHovered = t > 0.8
+        _ctaTrashClicked = t > 0.95
+        cursorScale.set(t > 0.95 ? lerp(1, 0.7, (t - 0.95) / 0.05) : 1)
       }
 
       // ── PHASE: Gap CTA → Socials ──
@@ -229,12 +214,13 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
         const t = clamp01((v - 0.080) / 0.012)
         const easedT = easeInOutQuart(t)
 
+        const arcY = Math.sin(t * Math.PI) * -12
         cursorX.set(lerp(pos.socialsCenter.x, pos.socialsTrash.x, easedT))
-        cursorY.set(lerp(pos.socialsCenter.y, pos.socialsTrash.y, easedT))
+        cursorY.set(lerp(pos.socialsCenter.y, pos.socialsTrash.y, easedT) + arcY)
 
-        _socialsTrashHovered = t > 0.5
-        _socialsTrashClicked = t > 0.9
-        cursorScale.set(t > 0.9 ? lerp(1, 0.7, (t - 0.9) / 0.1) : 1)
+        _socialsTrashHovered = t > 0.8
+        _socialsTrashClicked = t > 0.95
+        cursorScale.set(t > 0.95 ? lerp(1, 0.7, (t - 0.95) / 0.05) : 1)
       }
 
       // ── PHASE: Cursor desaparece ──
@@ -259,7 +245,8 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
       setSocialsTrashHovered(_socialsTrashHovered)
       setSocialsTrashClicked(_socialsTrashClicked)
     })
-  }, [positionsReady, scrollYProgress, cursorX, cursorY, cursorOpacity, cursorScale])
+  }, [scrollYProgress, cursorX, cursorY, cursorOpacity, cursorScale])
+
 
   // ── Typewriter loop ───────────────────────────────────────
   useEffect(() => {
