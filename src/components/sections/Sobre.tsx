@@ -73,7 +73,7 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
                 { value: '30+', label: 'Clientes' },
                 { value: '8+', label: 'Anos' },
               ].map((stat, i) => {
-                const statOpacity = useTransform(scrollYProgress, [0.2 + (i * 0.02), 0.25 + (i * 0.02), 0.32, 0.38], [0, 1, 1, 0])
+                const statOpacity = useTransform(scrollYProgress, [0.17 + (i * 0.01), 0.22 + (i * 0.01), 0.32, 0.38], [0, 1, 1, 0])
                 return (
                   <motion.div key={stat.label} className="stat-card glass-card" style={{ opacity: statOpacity }}>
                     <span className="stat-card__value gradient-text">{stat.value}</span>
@@ -100,7 +100,7 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
                 <TypewriterTextScroll
                   text={BIO_FULL}
                   scrollYProgress={scrollYProgress}
-                  range={[0.2, 0.3]} 
+                  range={[0.18, 0.24]}
                   isBlock
                 />
               </p>
@@ -109,7 +109,7 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
             {/* Skills */}
             <div className="sobre__skills">
               {SKILLS.map((skill, i) => {
-                const scaleX = useTransform(scrollYProgress, [0.22 + (i * 0.02), 0.28 + (i * 0.02), 0.32, 0.38], [0, skill.level / 100, skill.level / 100, 0])
+                const scaleX = useTransform(scrollYProgress, [0.19 + (i * 0.005), 0.22 + (i * 0.004), 0.32, 0.38], [0, skill.level / 100, skill.level / 100, 0])
                 
                 return (
                 <div key={skill.label} className="skill-bar">
@@ -128,8 +128,8 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
             {/* Tags */}
             <div className="sobre__tags">
               {TAGS.map((tag, i) => {
-                const tagOpacity = useTransform(scrollYProgress, [0.25 + (i * 0.01), 0.3 + (i * 0.01), 0.32, 0.38], [0, 1, 1, 0])
-                const tagScale = useTransform(scrollYProgress, [0.25 + (i * 0.01), 0.3 + (i * 0.01), 0.32, 0.38], [0.85, 1, 1, 0.85])
+                const tagOpacity = useTransform(scrollYProgress, [0.18 + (i * 0.002), 0.22 + (i * 0.002), 0.32, 0.38], [0, 1, 1, 0])
+                const tagScale = useTransform(scrollYProgress, [0.18 + (i * 0.002), 0.22 + (i * 0.002), 0.32, 0.38], [0.85, 1, 1, 0.85])
                 
                 return (
                 <motion.span
