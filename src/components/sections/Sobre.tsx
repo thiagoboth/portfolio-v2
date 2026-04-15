@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useRef } from 'react'
+import { motion, useTransform, MotionValue } from 'framer-motion'
+import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import './Sobre.css'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const BIO_FULL = `Sou um desenvolvedor apaixonado por criar soluções tecnológicas que fazem a diferença. Com mais de 8 anos de experiência em desenvolvimento de software e consultoria, ajudo empresas a transformar suas ideias em realidade digital — combinando habilidades técnicas sólidas com um olhar de designer para criar produtos que geram experiências excepcionais ao usuário.`
 
@@ -19,87 +16,34 @@ const SKILLS = [
 
 const TAGS = ['JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 'React Native', 'PostgreSQL', 'MongoDB', 'Docker', 'AWS', 'Figma', 'GraphQL']
 
-export function Sobre() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const bioRef = useRef<HTMLParagraphElement>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
-  const skillsRef = useRef<HTMLDivElement>(null)
-  const [visibleChars, setVisibleChars] = useState(0)
+export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
+  const TITLE_TEXT = 'Design meets Technology'
 
-  // Typewriter bio via scroll
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
+  // -- VISIBILITY & POINTER EVENTS --
+  // Active segment centered at 0.25. 
+  // Enters: 0.12 -> 0.18
+  // Plateau: 0.18 -> 0.32 (Snap point at 0.25)
+  // Exits: 0.32 -> 0.38
+  const sobreOpacity = useTransform(scrollYProgress, [0.12, 0.18, 0.32, 0.38], [0, 1, 1, 0])
+  const sobrePointerEvents = useTransform(scrollYProgress, (v) => (v > 0.15 && v < 0.35) ? 'auto' : 'none')
 
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: 'top 60%',
-      end: 'center 30%',
-      scrub: 1.5,
-      onUpdate: (self) => {
-        const chars = Math.round(self.progress * BIO_FULL.length)
-        setVisibleChars(chars)
-      },
-    })
-
-    return () => st.kill()
-  }, [])
-
-  // Image slide in
-  useEffect(() => {
-    const img = imageRef.current
-    if (!img) return
-
-    gsap.fromTo(img,
-      { x: -80, opacity: 0 },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 1.2,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: img,
-          start: 'top 75%',
-        },
-      }
-    )
-  }, [])
-
-  // Skills bars
-  useEffect(() => {
-    const el = skillsRef.current
-    if (!el) return
-
-    const bars = el.querySelectorAll('.skill-bar__fill')
-    bars.forEach((bar, i) => {
-      const level = SKILLS[i].level
-      gsap.fromTo(bar,
-        { scaleX: 0 },
-        {
-          scaleX: level / 100,
-          duration: 1.2,
-          ease: 'power3.out',
-          delay: i * 0.1,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 70%',
-          },
-        }
-      )
-    })
-  }, [])
-
-  const displayedBio = BIO_FULL.slice(0, visibleChars)
-  const isComplete = visibleChars >= BIO_FULL.length
-
+  // Avatar / Internal Animations
+  const avatarX = useTransform(scrollYProgress, [0.12, 0.18, 0.32, 0.38], [-40, 0, 0, -40])
+  const avatarOpacity = useTransform(scrollYProgress, [0.12, 0.18, 0.32, 0.38], [0, 1, 1, 0])
   return (
-    <section className="sobre section" id="sobre" ref={sectionRef}>
-      <div className="container">
+    <motion.section 
+      className="sobre section" 
+      id="sobre" 
+      style={{ 
+        position: 'absolute', 
+        inset: 0, 
+        opacity: sobreOpacity,
+        pointerEvents: sobrePointerEvents as any
+      }}
+    >
+      <div className="container" style={{ pointerEvents: 'auto' }}>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          style={{ opacity: avatarOpacity }}
           className="section-label"
         >
           Sobre mim
@@ -107,7 +51,10 @@ export function Sobre() {
 
         <div className="sobre__grid">
           {/* Left: Avatar/Image */}
-          <div ref={imageRef} className="sobre__image-wrap">
+          <motion.div 
+            className="sobre__image-wrap"
+            style={{ x: avatarX, opacity: avatarOpacity }}
+          >
             <div className="sobre__avatar">
               <div className="sobre__avatar-inner">
                 <span className="sobre__initials">TB</span>
@@ -125,63 +72,79 @@ export function Sobre() {
                 { value: '50+', label: 'Projetos' },
                 { value: '30+', label: 'Clientes' },
                 { value: '8+', label: 'Anos' },
-              ].map(stat => (
-                <div key={stat.label} className="stat-card glass-card">
-                  <span className="stat-card__value gradient-text">{stat.value}</span>
-                  <span className="stat-card__label">{stat.label}</span>
-                </div>
-              ))}
+              ].map((stat, i) => {
+                const statOpacity = useTransform(scrollYProgress, [0.2 + (i * 0.02), 0.25 + (i * 0.02), 0.32, 0.38], [0, 1, 1, 0])
+                return (
+                  <motion.div key={stat.label} className="stat-card glass-card" style={{ opacity: statOpacity }}>
+                    <span className="stat-card__value gradient-text">{stat.value}</span>
+                    <span className="stat-card__label">{stat.label}</span>
+                  </motion.div>
+                )
+              })}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right: Text */}
           <div className="sobre__text">
             <h2 className="sobre__heading">
-              Design meets <span className="gradient-text">Technology</span>
+              <TypewriterTextScroll
+                text={TITLE_TEXT}
+                scrollYProgress={scrollYProgress}
+                range={[0.18, 0.25]}
+                hideCursorOnDone
+              />
             </h2>
 
             <div className="sobre__bio-wrap">
-              <p ref={bioRef} className="sobre__bio mono">
-                {displayedBio || BIO_FULL}
-                {!isComplete && visibleChars > 0 && (
-                  <span className="cursor-blink" aria-hidden="true" />
-                )}
+              <p className="sobre__bio mono" style={{ margin: 0 }}>
+                <TypewriterTextScroll
+                  text={BIO_FULL}
+                  scrollYProgress={scrollYProgress}
+                  range={[0.2, 0.3]} 
+                  isBlock
+                />
               </p>
             </div>
 
             {/* Skills */}
-            <div ref={skillsRef} className="sobre__skills">
-              {SKILLS.map(skill => (
+            <div className="sobre__skills">
+              {SKILLS.map((skill, i) => {
+                const scaleX = useTransform(scrollYProgress, [0.22 + (i * 0.02), 0.28 + (i * 0.02), 0.32, 0.38], [0, skill.level / 100, skill.level / 100, 0])
+                
+                return (
                 <div key={skill.label} className="skill-bar">
                   <div className="skill-bar__header">
                     <span className="skill-bar__label">{skill.label}</span>
                     <span className="skill-bar__value">{skill.level}%</span>
                   </div>
                   <div className="skill-bar__track">
-                    <div className="skill-bar__fill" />
+                    <motion.div className="skill-bar__fill" style={{ scaleX, transformOrigin: 'left' }} />
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Tags */}
             <div className="sobre__tags">
-              {TAGS.map((tag, i) => (
+              {TAGS.map((tag, i) => {
+                const tagOpacity = useTransform(scrollYProgress, [0.25 + (i * 0.01), 0.3 + (i * 0.01), 0.32, 0.38], [0, 1, 1, 0])
+                const tagScale = useTransform(scrollYProgress, [0.25 + (i * 0.01), 0.3 + (i * 0.01), 0.32, 0.38], [0.85, 1, 1, 0.85])
+                
+                return (
                 <motion.span
                   key={tag}
                   className="tag"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                  style={{ opacity: tagOpacity, scale: tagScale }}
                 >
                   {tag}
                 </motion.span>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }

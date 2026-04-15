@@ -1,11 +1,8 @@
-import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useRef } from 'react'
+import { motion, useTransform, MotionValue } from 'framer-motion'
 import { Globe, Smartphone, Database, Layers, BarChart, Shield } from 'lucide-react'
+import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import './Servicos.css'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const SERVICES = [
   {
@@ -58,79 +55,82 @@ const SERVICES = [
   },
 ]
 
-export function Servicos() {
+export function Servicos({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const sectionRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const cards = cardsRef.current?.querySelectorAll('.service-card')
-    if (!cards) return
-
-    cards.forEach((card, i) => {
-      gsap.fromTo(card,
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: 'power3.out',
-          delay: (i % 3) * 0.12,
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 85%',
-          },
-        }
-      )
-    })
-  }, [])
+  
+  // -- VISIBILITY & POINTER EVENTS --
+  // Active segment centered at 0.50. 
+  // Enters: 0.37 -> 0.43
+  // Plateau: 0.43 -> 0.57 (Snap point at 0.50)
+  // Exits: 0.57 -> 0.63
+  const sectionOpacity = useTransform(scrollYProgress, [0.37, 0.43, 0.57, 0.63], [0, 1, 1, 0])
+  const sectionPointerEvents = useTransform(scrollYProgress, (v) => (v > 0.40 && v < 0.60) ? 'auto' : 'none')
 
   return (
-    <section className="servicos section" id="servicos" ref={sectionRef}>
-      <div className="container">
-        <motion.div
-          className="section-label"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
+    <motion.section 
+      className="servicos section" 
+      id="servicos" 
+      ref={sectionRef}
+      style={{ 
+        position: 'absolute', 
+        inset: 0, 
+        opacity: sectionOpacity, 
+        pointerEvents: sectionPointerEvents as any
+      }}
+    >
+      <div className="container" style={{ pointerEvents: 'auto' }}>
+        <motion.div className="section-label">
           O que faço
         </motion.div>
 
         <div className="servicos__header">
-          <motion.h2
-            className="servicos__title"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            Serviços que <span className="gradient-text">transformam</span>
-            <br />negócios
-          </motion.h2>
+          <h2 className="servicos__title">
+            <TypewriterTextScroll
+              text="Serviços que"
+              scrollYProgress={scrollYProgress}
+              range={[0.4, 0.44]}
+              hideCursorOnDone
+            />{' '}
+            <span className="gradient-text">
+              <TypewriterTextScroll
+                text="transformam"
+                scrollYProgress={scrollYProgress}
+                range={[0.44, 0.48]}
+                hideCursorOnDone
+              />
+            </span>
+            <br />
+            <TypewriterTextScroll
+              text="negócios"
+              scrollYProgress={scrollYProgress}
+              range={[0.48, 0.52]}
+              hideCursorOnDone
+            />
+          </h2>
 
-          <motion.p
-            className="servicos__subtitle"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Do conceito à produção, ofereço soluções end-to-end para
-            cada fase da sua jornada digital.
-          </motion.p>
+          <p className="servicos__subtitle" style={{ margin: 0 }}>
+            <TypewriterTextScroll
+              text="Do conceito à produção, ofereço soluções end-to-end para cada fase da sua jornada digital."
+              scrollYProgress={scrollYProgress}
+              range={[0.42, 0.54]}
+              isBlock
+            />
+          </p>
         </div>
 
-        <div ref={cardsRef} className="servicos__grid">
-          {SERVICES.map(service => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
+        <div className="servicos__grid">
+          {SERVICES.map((service, i) => {
+            const cardOpacity = useTransform(scrollYProgress, [0.45 + (i * 0.01), 0.5 + (i * 0.01), 0.57, 0.63], [0, 1, 1, 0])
+            const cardY = useTransform(scrollYProgress, [0.45 + (i * 0.01), 0.5 + (i * 0.01), 0.57, 0.63], [40, 0, 0, 40])
+            return <ServiceCard key={service.id} service={service} style={{ opacity: cardOpacity, y: cardY }} />
+          })}
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
-function ServiceCard({ service }: { service: typeof SERVICES[0] }) {
+function ServiceCard({ service, style }: { service: typeof SERVICES[0], style: React.CSSProperties | any }) {
   const Icon = service.icon
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -144,11 +144,11 @@ function ServiceCard({ service }: { service: typeof SERVICES[0] }) {
   }
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
       className="service-card glass-card"
       onMouseMove={handleMouseMove}
-      style={{ '--service-color': service.color } as React.CSSProperties}
+      style={{ '--service-color': service.color, ...style } as any}
       id={`service-card-${service.id}`}
     >
       <div className="service-card__spotlight" />
@@ -165,6 +165,6 @@ function ServiceCard({ service }: { service: typeof SERVICES[0] }) {
           <span key={tag} className="service-tag">{tag}</span>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }

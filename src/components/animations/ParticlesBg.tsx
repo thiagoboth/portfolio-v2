@@ -106,11 +106,11 @@ export function ParticlesBg() {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
         width: '100%',
         height: '100%',
-        zIndex: 0,
+        zIndex: -1,
         pointerEvents: 'none',
       }}
     />

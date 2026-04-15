@@ -1,10 +1,15 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useScroll, MotionValue, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Navbar } from './components/layout/Navbar'
+import { ParticlesBg } from './components/animations/ParticlesBg'
 import { Hero } from './components/sections/Hero'
 import { Sobre } from './components/sections/Sobre'
 import { Servicos } from './components/sections/Servicos'
 import { Projetos } from './components/sections/Projetos'
 import { Contato } from './components/sections/Contato'
+import { Loader } from './components/ui/Loader'
 import { useLenis } from './hooks/useLenis'
 import { useScrollProgress } from './hooks/useScrollProgress'
 
@@ -50,13 +55,56 @@ function CursorDot() {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Give enough time to show off the loader animation
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2800)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
   useLenis()
   useScrollProgress()
 
+  const trackRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"]
+  })
+
+  // GSAP Snapping
+  useEffect(() => {
+    if (!trackRef.current) return
+
+    const st = ScrollTrigger.create({
+      trigger: trackRef.current,
+      start: "top top",
+      end: "bottom bottom",
+      snap: {
+        snapTo: [0, 0.25, 0.5, 0.75, 1], // 5 sections = 4 intervals
+        duration: { min: 0.5, max: 0.8 },
+        delay: 0.1,
+        ease: "power2.inOut"
+      }
+    })
+
+    return () => st.kill()
+  }, [])
+
   return (
     <>
+      <AnimatePresence>
+        {isLoading && <Loader />}
+      </AnimatePresence>
+
       {/* Scroll progress bar */}
       <div id="scroll-progress" />
+      
+      {/* Global Background */}
+      <ParticlesBg />
 
       {/* Custom cursor (desktop only) */}
       <CursorDot />
@@ -64,11 +112,16 @@ export default function App() {
       <Navbar />
 
       <main>
-        <Hero />
-        <Sobre />
-        <Servicos />
-        <Projetos />
-        <Contato />
+        {/* Full Single Screen Track For Every Section */}
+        <div ref={trackRef} style={{ height: '500vh', position: 'relative' }}>
+          <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' }}>
+            <Hero scrollYProgress={scrollYProgress} />
+            <Sobre scrollYProgress={scrollYProgress} />
+            <Servicos scrollYProgress={scrollYProgress} />
+            <Projetos scrollYProgress={scrollYProgress} />
+            <Contato scrollYProgress={scrollYProgress} />
+          </div>
+        </div>
       </main>
     </>
   )

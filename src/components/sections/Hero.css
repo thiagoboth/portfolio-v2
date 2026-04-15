@@ -49,7 +49,16 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+/* Outer wrapper para o FigmaSelectableBlock — garante espaçamento e padding para o trash button */
+.hero__cta-outer {
   margin-bottom: 48px;
+  padding-top: 12px; /* espaço para o botão de lixeira aparecer acima */
+}
+
+.hero__socials-outer {
+  padding-top: 8px;
 }
 
 .btn-primary {

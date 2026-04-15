@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useState } from 'react'
+import { motion, AnimatePresence, useTransform, MotionValue } from 'framer-motion'
 import { ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react'
+import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import './Projetos.css'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const PROJECTS = [
   {
@@ -54,10 +51,9 @@ const PROJECTS = [
   },
 ]
 
-export function Projetos() {
+export function Projetos({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [direction, setDirection] = useState(0)
-  const sectionRef = useRef<HTMLElement>(null)
   const project = PROJECTS[activeIndex]
 
   const navigate = (dir: number) => {
@@ -65,20 +61,13 @@ export function Projetos() {
     setActiveIndex(prev => (prev + dir + PROJECTS.length) % PROJECTS.length)
   }
 
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-
-    gsap.fromTo(section.querySelector('.projetos__header'),
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        scrollTrigger: { trigger: section, start: 'top 70%' },
-      }
-    )
-  }, [])
+  // -- VISIBILITY & POINTER EVENTS --
+  // Active segment centered at 0.75. 
+  // Enters: 0.62 -> 0.68
+  // Plateau: 0.68 -> 0.82 (Snap point at 0.75)
+  // Exits: 0.82 -> 0.88
+  const sectionOpacity = useTransform(scrollYProgress, [0.62, 0.68, 0.82, 0.88], [0, 1, 1, 0])
+  const sectionPointerEvents = useTransform(scrollYProgress, (v) => (v > 0.65 && v < 0.85) ? 'auto' : 'none')
 
   const slideVariants = {
     enter: (dir: number) => ({
@@ -95,13 +84,41 @@ export function Projetos() {
   }
 
   return (
-    <section className="projetos section" id="projetos" ref={sectionRef}>
-      <div className="container">
+    <motion.section 
+      className="projetos section" 
+      id="projetos" 
+      style={{ 
+        position: 'absolute', 
+        inset: 0, 
+        opacity: sectionOpacity, 
+        pointerEvents: sectionPointerEvents as any
+      }}
+    >
+      <div className="container" style={{ pointerEvents: 'auto' }}>
         <div className="projetos__header">
           <div className="section-label">Portfólio</div>
           <h2 className="projetos__title">
-            Projetos que <span className="gradient-text">falam</span>
-            <br />por si mesmos
+            <TypewriterTextScroll
+              text="Projetos que"
+              scrollYProgress={scrollYProgress}
+              range={[0.65, 0.69]}
+              hideCursorOnDone
+            />{' '}
+            <span className="gradient-text">
+              <TypewriterTextScroll
+                text="falam"
+                scrollYProgress={scrollYProgress}
+                range={[0.69, 0.72]}
+                hideCursorOnDone
+              />
+            </span>
+            <br />
+            <TypewriterTextScroll
+              text="por si mesmos"
+              scrollYProgress={scrollYProgress}
+              range={[0.72, 0.76]}
+              hideCursorOnDone
+            />
           </h2>
         </div>
 
@@ -246,6 +263,6 @@ export function Projetos() {
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }

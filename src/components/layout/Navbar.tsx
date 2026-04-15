@@ -18,30 +18,47 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState('hero')
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
+    const onScroll = () => {
+      const scrollY = window.scrollY
+      setScrolled(scrollY > 40)
+      
+      const vh = window.innerHeight
+      if (scrollY < vh * 0.5) {
+        setActiveSection('hero')
+      } else if (scrollY < vh * 1.5) {
+        setActiveSection('sobre')
+      } else if (scrollY < vh * 2.5) {
+        setActiveSection('servicos')
+      } else if (scrollY < vh * 3.5) {
+        setActiveSection('projetos')
+      } else {
+        setActiveSection('contato')
+      }
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
-          }
-        })
-      },
-      { threshold: 0.3 }
-    )
-    document.querySelectorAll('section[id]').forEach(s => observer.observe(s))
-    return () => observer.disconnect()
+    
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [])
 
   const handleNav = (href: string) => {
     setMenuOpen(false)
-    const el = document.querySelector(href)
-    el?.scrollIntoView({ behavior: 'smooth' })
+    const vh = window.innerHeight
+    let targetScroll = 0
+    
+    switch (href) {
+      case '#hero': targetScroll = 0; break;
+      case '#sobre': targetScroll = vh * 1; break; // 100vh => progress 0.25
+      case '#servicos': targetScroll = vh * 2; break; // 200vh => progress 0.50
+      case '#projetos': targetScroll = vh * 3; break; // 300vh => progress 0.75
+      case '#contato': targetScroll = vh * 4; break; // 400vh => progress 1.00
+    }
+
+    // Small timeout to allow menu close animation
+    setTimeout(() => {
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' })
+    }, 50)
   }
 
   return (

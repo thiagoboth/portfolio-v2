@@ -1,58 +1,86 @@
-import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useState, useEffect } from 'react'
+import { MotionValue } from 'framer-motion'
 
-gsap.registerPlugin(ScrollTrigger)
-
-interface ScrollTypewriterProps {
-  fromText: string
-  toText: string
-  triggerRef: React.RefObject<HTMLElement | null>
+interface TypewriterTextScrollProps {
+  text: string
+  scrollYProgress: MotionValue<number>
+  range: [number, number]
   className?: string
+  style?: React.CSSProperties
+  isBlock?: boolean
+  hideCursorOnDone?: boolean
 }
 
-export function ScrollTypewriter({
-  fromText,
-  toText,
-  triggerRef,
+export function TypewriterTextScroll({
+  text,
+  scrollYProgress,
+  range,
   className = '',
-}: ScrollTypewriterProps) {
-  const elRef = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    const el = elRef.current
-    const trigger = triggerRef.current
-    if (!el || !trigger) return
-
-    let progress = 0
-
-    const updateText = (p: number) => {
-      if (p === progress) return
-      progress = p
-
-      if (p < 0.5) {
-        const erasedChars = Math.round(fromText.length * (p / 0.5))
-        el.textContent = fromText.slice(0, fromText.length - erasedChars)
-      } else {
-        const typedChars = Math.round(toText.length * ((p - 0.5) / 0.5))
-        el.textContent = toText.slice(0, typedChars)
-      }
+  style = {},
+  isBlock = false,
+  hideCursorOnDone = false,
+}: TypewriterTextScrollProps) {
+  const [chars, setChars] = useState(() => {
+    const [start, end] = range
+    const isReverse = start > end
+    const min = Math.min(start, end)
+    const max = Math.max(start, end)
+    const latest = scrollYProgress.get()
+    let percent = 0
+    if (latest <= min) {
+      percent = isReverse ? 1 : 0
+    } else if (latest >= max) {
+      percent = isReverse ? 0 : 1
+    } else {
+      percent = (latest - start) / (end - start)
     }
+    return Math.round(percent * text.length)
+  })
 
-    const st = ScrollTrigger.create({
-      trigger,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 1.2,
-      onUpdate: (self) => updateText(self.progress),
+  // Map progress: 
+  // Before range[0]: 0 chars
+  // Between range[0] and range[1]: 0 to text.length
+  // Past range[1]: text.length chars
+  useEffect(() => {
+    return scrollYProgress.on('change', (latest) => {
+      const [start, end] = range
+      const isReverse = start > end
+      
+      const min = Math.min(start, end)
+      const max = Math.max(start, end)
+      
+      let percent = 0
+      if (latest <= min) {
+        percent = isReverse ? 1 : 0
+      } else if (latest >= max) {
+        percent = isReverse ? 0 : 1
+      } else {
+        percent = (latest - start) / (end - start)
+      }
+      
+      const currentChars = Math.round(percent * text.length)
+      setChars(currentChars)
     })
+  }, [scrollYProgress, range, text.length])
 
-    return () => st.kill()
-  }, [fromText, toText, triggerRef])
+  const isTyping = chars > 0 && chars < text.length
+  const isDone = chars === text.length
+  const showCursor = isTyping || (!hideCursorOnDone && isDone)
+
+  const Tag = isBlock ? 'div' : 'span'
 
   return (
-    <span ref={elRef} className={`typewriter-text ${className}`}>
-      {fromText}
-    </span>
+    <Tag className={`typewriter-wrap ${className}`} style={{ position: 'relative', display: isBlock ? 'block' : 'inline-block', width: '100%', textAlign: 'inherit', ...style }}>
+      {/* Invisible placeholder for height preservation */}
+      <Tag style={{ opacity: 0, pointerEvents: 'none', userSelect: 'none', display: 'inline' }}>
+        {text}
+      </Tag>
+      
+      {/* Absolute positioned typing text */}
+      <Tag style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, textAlign: 'inherit', display: 'inline' }}>
+        {text.slice(0, chars)}
+        {showCursor && <span className="cursor-blink" aria-hidden="true" />}
+      </Tag>
+    </Tag>
   )
 }

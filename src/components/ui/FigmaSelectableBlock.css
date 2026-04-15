@@ -1,0 +1,64 @@
+/* ================================================
+   FigmaSelectableBlock
+   ================================================ */
+
+/* Wrapper — inline-block para NÃO tomar a largura toda */
+.figma-selectable {
+  position: relative;
+  display: inline-block; /* shrinks to fit content */
+}
+
+/* ── Borda de seleção ── */
+.figma-selection-frame {
+  position: absolute;
+  inset: -4px; /* 2px de padding visual do conteúdo + 2px do border width */
+  border: 1.5px solid #7c6cf0;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow:
+    0 0 0 1px rgba(124, 108, 240, 0.1),
+    inset 0 0 12px rgba(124, 108, 240, 0.03);
+}
+
+/* ── Handles dos cantos ── */
+.figma-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  border: 1.5px solid #7c6cf0;
+  border-radius: 1px;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.figma-handle--tl { top:    -3.5px; left:  -3.5px; }
+.figma-handle--tr { top:    -3.5px; right: -3.5px; }
+.figma-handle--bl { bottom: -3.5px; left:  -3.5px; }
+.figma-handle--br { bottom: -3.5px; right: -3.5px; }
+
+/* ── Botão de lixeira ── */
+.figma-trash-btn {
+  position: absolute;
+  top: -22px;
+  right: -1px;
+  width: 20px;
+  height: 20px;
+  background: rgba(124, 108, 240, 0.92);
+  border: 1px solid rgba(124, 108, 240, 0.5);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(124, 108, 240, 0.45);
+  transition: background 0.15s ease;
+}
+
+.figma-trash-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

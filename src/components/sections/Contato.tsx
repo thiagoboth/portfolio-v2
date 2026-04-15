@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useTransform, MotionValue } from 'framer-motion'
 import { Mail, Phone, Linkedin, Send, CheckCircle } from 'lucide-react'
+import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import './Contato.css'
 
 interface FormData {
@@ -12,7 +13,7 @@ interface FormData {
 
 const FIELD_ORDER = ['name', 'email', 'subject', 'message'] as const
 
-export function Contato() {
+export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const formRef = useRef<HTMLFormElement>(null)
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', subject: '', message: '' })
   const [focused, setFocused] = useState<string | null>(null)
@@ -55,45 +56,69 @@ export function Contato() {
     },
   ]
 
-  const containerVariants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.1 } },
-  }
-
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
   }
 
+  // -- VISIBILITY & POINTER EVENTS --
+  // Active segment centered at 1.00 (End). 
+  // Enters: 0.87 -> 0.93
+  // Plateau: 0.93 -> 1.0
+  const sectionOpacity = useTransform(scrollYProgress, [0.87, 0.93], [0, 1])
+  const sectionPointerEvents = useTransform(scrollYProgress, (v) => v > 0.90 ? 'auto' : 'none')
+
   return (
-    <section className="contato section" id="contato">
+    <motion.section 
+      className="contato section" 
+      id="contato"
+      style={{ 
+        position: 'absolute', 
+        inset: 0, 
+        opacity: sectionOpacity, 
+        pointerEvents: sectionPointerEvents as any
+      }}
+    >
       {/* Animated background mesh */}
-      <div className="contato__mesh" aria-hidden="true">
+      <div className="contato__mesh" aria-hidden="true" style={{ pointerEvents: 'none' }}>
         <div className="mesh-blob mesh-blob--1" />
         <div className="mesh-blob mesh-blob--2" />
         <div className="mesh-blob mesh-blob--3" />
       </div>
 
-      <div className="container">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <motion.div variants={itemVariants} className="section-label">
+      <div className="container" style={{ pointerEvents: 'auto' }}>
+        <div>
+          <div className="section-label">
             Vamos conversar
-          </motion.div>
+          </div>
 
-          <motion.h2 variants={itemVariants} className="contato__title">
-            Pronto para transformar
-            <br />sua <span className="gradient-text">ideia em realidade</span>?
-          </motion.h2>
+          <h2 className="contato__title">
+            <TypewriterTextScroll
+              text="Pronto para transformar"
+              scrollYProgress={scrollYProgress}
+              range={[0.92, 0.95]}
+              hideCursorOnDone
+            />
+            <br />
+            <span className="gradient-text">
+              <TypewriterTextScroll
+                text="sua ideia em realidade?"
+                scrollYProgress={scrollYProgress}
+                range={[0.95, 0.98]}
+                hideCursorOnDone
+              />
+            </span>
+          </h2>
 
-          <motion.p variants={itemVariants} className="contato__subtitle">
-            Entre em contato e descubra como posso ajudar seu projeto a décolar.
-            Respondo em até 24 horas.
-          </motion.p>
+          <p className="contato__subtitle" style={{ margin: 0 }}>
+            <TypewriterTextScroll
+              text="Entre em contato e descubra como posso ajudar seu projeto a decolar. Respondo em até 24 horas."
+              scrollYProgress={scrollYProgress}
+              range={[0.93, 0.99]}
+              isBlock
+              hideCursorOnDone
+            />
+          </p>
 
           <div className="contato__grid">
             {/* Contact Info */}
@@ -208,7 +233,7 @@ export function Contato() {
               )}
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Footer */}
@@ -228,6 +253,6 @@ export function Contato() {
           </span>
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
