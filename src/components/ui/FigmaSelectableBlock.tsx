@@ -43,62 +43,73 @@ export function FigmaSelectableBlock({
   const actuallyVisible = visible && !isTemporarilyDeleted
 
   return (
-    <AnimatePresence>
-      {actuallyVisible && (
-        <motion.div
-          id={id}
-          className={`figma-selectable ${className}`}
-          onMouseEnter={() => setManualHover(true)}
-          onMouseLeave={() => setManualHover(false)}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-        >
-          {/* Borda estilo Figma */}
-          <AnimatePresence>
-            {showBorder && (
-              <motion.div
-                key="selection"
-                className="figma-selection-frame"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.1 }}
-              >
-                <span className="figma-handle figma-handle--tl" />
-                <span className="figma-handle figma-handle--tr" />
-                <span className="figma-handle figma-handle--bl" />
-                <span className="figma-handle figma-handle--br" />
+    <div
+      id={id}
+      className={`figma-selectable-wrapper ${className}`}
+      onMouseEnter={() => setManualHover(true)}
+      onMouseLeave={() => setManualHover(false)}
+    >
+      {/* Ghost layer to preserve space */}
+      <div className="figma-selectable-ghost" aria-hidden="true">
+        {children}
+      </div>
 
-                <motion.button
-                  className="figma-trash-btn"
-                  onClick={handleManualDelete}
-                  animate={{
-                    scale: trashClicked ? 0.7 : trashHovered ? 1.25 : 1,
-                    backgroundColor: trashClicked
-                      ? 'rgba(239, 68, 68, 0.95)'
-                      : trashHovered
-                        ? 'rgba(124, 108, 240, 1)'
-                        : 'rgba(124, 108, 240, 0.88)',
-                    boxShadow: trashHovered
-                      ? '0 0 14px rgba(124, 108, 240, 0.7)'
-                      : '0 2px 6px rgba(124, 108, 240, 0.3)',
-                  }}
-                  transition={{ duration: 0.12 }}
-                  whileHover={{ scale: 1.25, backgroundColor: 'rgba(239, 68, 68, 0.95)' }}
-                  whileTap={{ scale: 0.75 }}
-                  title="Remover elemento"
+      {/* Animated layer */}
+      <AnimatePresence>
+        {actuallyVisible && (
+          <motion.div
+            key="content"
+            className="figma-selectable-content"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Borda estilo Figma */}
+            <AnimatePresence>
+              {showBorder && (
+                <motion.div
+                  key="selection"
+                  className="figma-selection-frame"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.1 }}
                 >
-                  <Trash2 size={10} />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <span className="figma-handle figma-handle--tl" />
+                  <span className="figma-handle figma-handle--tr" />
+                  <span className="figma-handle figma-handle--bl" />
+                  <span className="figma-handle figma-handle--br" />
 
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
+                  <motion.button
+                    className="figma-trash-btn"
+                    onClick={handleManualDelete}
+                    animate={{
+                      scale: trashClicked ? 0.7 : trashHovered ? 1.25 : 1,
+                      backgroundColor: trashClicked
+                        ? 'rgba(239, 68, 68, 0.95)'
+                        : trashHovered
+                          ? 'rgba(124, 108, 240, 1)'
+                          : 'rgba(124, 108, 240, 0.88)',
+                      boxShadow: trashHovered
+                        ? '0 0 14px rgba(124, 108, 240, 0.7)'
+                        : '0 2px 6px rgba(124, 108, 240, 0.3)',
+                    }}
+                    transition={{ duration: 0.12 }}
+                    whileHover={{ scale: 1.25, backgroundColor: 'rgba(239, 68, 68, 0.95)' }}
+                    whileTap={{ scale: 0.75 }}
+                    title="Remover elemento"
+                  >
+                    <Trash2 size={10} />
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

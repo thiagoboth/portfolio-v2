@@ -3,9 +3,25 @@
    ================================================ */
 
 /* Wrapper — inline-block para NÃO tomar a largura toda */
-.figma-selectable {
+.figma-selectable-wrapper {
   position: relative;
   display: inline-block; /* shrinks to fit content */
+}
+
+/* Layer que mantém o espaço ocupado no layout */
+.figma-selectable-ghost {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Layer real que anima */
+.figma-selectable-content {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex; /* Garante alinhamento interno similar ao original */
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── Borda de seleção ── */
