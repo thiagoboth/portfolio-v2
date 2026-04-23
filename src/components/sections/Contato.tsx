@@ -110,7 +110,7 @@ export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<numb
             </span>
           </h2>
 
-          <p className="contato__subtitle" style={{ margin: 0 }}>
+          <div className="contato__subtitle" style={{ margin: 0 }}>
             <TypewriterTextScroll
               text="Entre em contato e descubra como posso ajudar seu projeto a decolar. Respondo em até 24 horas."
               scrollYProgress={scrollYProgress}
@@ -118,7 +118,7 @@ export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<numb
               isBlock
               hideCursorOnDone
             />
-          </p>
+          </div>
 
           <div className="contato__grid">
             {/* Contact Info */}

@@ -3,7 +3,7 @@ import { motion, useTransform, MotionValue } from 'framer-motion'
 import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import './Sobre.css'
 
-const BIO_FULL = `Sou um desenvolvedor apaixonado por criar soluções tecnológicas que fazem a diferença. Com mais de 8 anos de experiência em desenvolvimento de software e consultoria, ajudo empresas a transformar suas ideias em realidade digital — combinando habilidades técnicas sólidas com um olhar de designer para criar produtos que geram experiências excepcionais ao usuário.`
+const BIO_FULL = `Sou um desenvolvedor fullstack apaixonado por criar soluções que fazem a diferença. Com mais de 8 anos de experiência, combino desenvolvimento web de ponta com o poder da Inteligência Artificial — construindo agentes autônomos, automações inteligentes com N8N e produtos digitais que unem performance técnica com experiências excepcionais ao usuário.`
 
 const SKILLS = [
   { label: 'React / Next.js', level: 95 },
@@ -14,7 +14,7 @@ const SKILLS = [
   { label: 'UI/UX Design', level: 80 },
 ]
 
-const TAGS = ['JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 'React Native', 'PostgreSQL', 'MongoDB', 'Docker', 'AWS', 'Figma', 'GraphQL']
+const TAGS = ['JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 'React Native', 'PostgreSQL', 'MongoDB', 'Docker', 'AWS', 'Figma', 'GraphQL', 'N8N']
 
 export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const TITLE_TEXT = 'Design meets Technology'
@@ -69,9 +69,8 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
             {/* Stats */}
             <div className="sobre__stats">
               {[
-                { value: '50+', label: 'Projetos' },
-                { value: '30+', label: 'Clientes' },
-                { value: '8+', label: 'Anos' },
+                { value: 'IA', label: '& Agentes' },
+                { value: 'Full', label: 'stack' },
               ].map((stat, i) => {
                 const statOpacity = useTransform(scrollYProgress, [0.17 + (i * 0.01), 0.22 + (i * 0.01), 0.32, 0.38], [0, 1, 1, 0])
                 return (
@@ -96,14 +95,14 @@ export function Sobre({ scrollYProgress }: { scrollYProgress: MotionValue<number
             </h2>
 
             <div className="sobre__bio-wrap">
-              <p className="sobre__bio mono" style={{ margin: 0 }}>
+              <div className="sobre__bio mono" style={{ margin: 0 }}>
                 <TypewriterTextScroll
                   text={BIO_FULL}
                   scrollYProgress={scrollYProgress}
                   range={[0.18, 0.24]}
                   isBlock
                 />
-              </p>
+              </div>
             </div>
 
             {/* Skills */}

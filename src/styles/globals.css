@@ -250,7 +250,7 @@ img {
 /* --- Responsive --- */
 @media (max-width: 768px) {
   :root {
-    --section-padding: 80px;
+    --section-padding: 60px;
     --nav-height: 60px;
   }
 }

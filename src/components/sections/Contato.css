@@ -325,12 +325,72 @@
 @media (max-width: 900px) {
   .contato__grid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
+  }
+
+  .contato__subtitle {
+    margin-bottom: 32px;
+  }
+
+  .contato__form {
+    gap: 16px;
+  }
+
+  .form-textarea {
+    min-height: 100px;
+  }
+
+  .footer {
+    margin-top: 40px;
   }
 
   .footer__inner {
     flex-direction: column;
     gap: 12px;
     text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .contato__subtitle {
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+  }
+
+  .contato__form {
+    gap: 14px;
+  }
+
+  .form-input {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+  }
+
+  .form-textarea {
+    min-height: 80px;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+  }
+
+  .form-submit {
+    padding: 14px 24px;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .contact-item {
+    padding: 14px;
+  }
+
+  .footer {
+    margin-top: 24px;
+    padding: 16px 0;
+  }
+
+  .form-success {
+    padding: 40px 20px;
   }
 }

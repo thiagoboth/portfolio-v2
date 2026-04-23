@@ -358,7 +358,7 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
           </motion.h1>
 
           {/* Subtitle — deleta no scroll */}
-          <motion.p
+          <motion.div
             className="hero__subtitle"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -372,7 +372,7 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
               isBlock
               hideCursorOnDone
             />
-          </motion.p>
+          </motion.div>
 
           {/* CTAs — Figma Selectable */}
           <motion.div

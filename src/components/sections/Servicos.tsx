@@ -108,14 +108,14 @@ export function Servicos({ scrollYProgress }: { scrollYProgress: MotionValue<num
             />
           </h2>
 
-          <p className="servicos__subtitle" style={{ margin: 0 }}>
+          <div className="servicos__subtitle" style={{ margin: 0 }}>
             <TypewriterTextScroll
               text="Do conceito à produção, ofereço soluções end-to-end para cada fase da sua jornada digital."
               scrollYProgress={scrollYProgress}
               range={[0.42, 0.54]}
               isBlock
             />
-          </p>
+          </div>
         </div>
 
         <div className="servicos__grid">

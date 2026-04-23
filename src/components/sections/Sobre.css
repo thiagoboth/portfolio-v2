@@ -82,7 +82,7 @@
 
 .sobre__avatar-badge small {
   font-family: var(--font-body);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: rgba(255,255,255,0.8);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -91,7 +91,7 @@
 /* Stats */
 .sobre__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
@@ -202,11 +202,87 @@
 @media (max-width: 900px) {
   .sobre__grid {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 32px;
   }
 
   .sobre__avatar {
-    width: 220px;
-    height: 220px;
+    width: 180px;
+    height: 180px;
+  }
+
+  .sobre__initials {
+    font-size: 4.5rem;
+  }
+
+  .sobre__bio-wrap {
+    min-height: 100px;
+    margin-bottom: 20px;
+  }
+
+  .sobre__skills {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .sobre__heading {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sobre__grid {
+    gap: 20px;
+  }
+
+  .sobre__avatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .sobre__initials {
+    font-size: 3.5rem;
+  }
+
+  .sobre__stats {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px 8px;
+  }
+
+  .stat-card__value {
+    font-size: 1.3rem;
+  }
+
+  .sobre__bio-wrap {
+    min-height: auto;
+    margin-bottom: 16px;
+  }
+
+  .sobre__bio {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .sobre__skills {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .skill-bar__label {
+    font-size: 0.8rem;
+  }
+
+  .skill-bar__value {
+    font-size: 0.75rem;
+  }
+
+  .sobre__tags {
+    gap: 6px;
+  }
+
+  .sobre__heading {
+    margin-bottom: 12px;
   }
 }

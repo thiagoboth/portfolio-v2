@@ -114,7 +114,7 @@ export default function App() {
       <main>
         {/* Full Single Screen Track For Every Section */}
         <div ref={trackRef} style={{ height: '500vh', position: 'relative' }}>
-          <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' }}>
+          <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' }} className="scroll-viewport">
             <Hero scrollYProgress={scrollYProgress} />
             <Sobre scrollYProgress={scrollYProgress} />
             <Servicos scrollYProgress={scrollYProgress} />
