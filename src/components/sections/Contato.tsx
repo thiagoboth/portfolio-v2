@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
-import { motion, useTransform, MotionValue } from 'framer-motion'
+import { motion, MotionValue } from 'framer-motion'
 import { Mail, Phone, Linkedin, Send, CheckCircle } from 'lucide-react'
 import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
+import { useSectionScroll } from '../../hooks/useSectionScroll'
+import { useSectionTransition } from '../../hooks/useSectionTransition'
 import './Contato.css'
 
 interface FormData {
@@ -61,22 +63,23 @@ export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<numb
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
   }
 
-  // -- VISIBILITY & POINTER EVENTS --
-  // Active segment centered at 1.00 (End). 
-  // Enters: 0.87 -> 0.93
-  // Plateau: 0.93 -> 1.0
-  const sectionOpacity = useTransform(scrollYProgress, [0.87, 0.93], [0, 1])
-  const sectionPointerEvents = useTransform(scrollYProgress, (v) => v > 0.90 ? 'auto' : 'none')
+  // ── Wrapper transition (controlled by scrollStore) ────────
+  const { opacity: wrapperOpacity, y: wrapperY, pointerEvents: wrapperPointerEvents } = useSectionTransition('contato')
+
+  // Hook for internal scrolling
+  const { ref: scrollRef, y: scrollY } = useSectionScroll(scrollYProgress, [0.93, 1.0])
 
   return (
     <motion.section 
       className="contato section" 
       id="contato"
+      data-section="contato"
       style={{ 
         position: 'absolute', 
         inset: 0, 
-        opacity: sectionOpacity, 
-        pointerEvents: sectionPointerEvents as any
+        opacity: wrapperOpacity,
+        y: wrapperY,
+        pointerEvents: wrapperPointerEvents
       }}
     >
       {/* Animated background mesh */}
@@ -86,8 +89,9 @@ export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<numb
         <div className="mesh-blob mesh-blob--3" />
       </div>
 
-      <div className="container" style={{ pointerEvents: 'auto' }}>
-        <div>
+      <motion.div ref={scrollRef} style={{ y: scrollY, width: '100%' }}>
+        <div className="container" style={{ pointerEvents: 'auto' }}>
+          <div>
           <div className="section-label">
             Vamos conversar
           </div>
@@ -253,6 +257,7 @@ export function Contato({ scrollYProgress }: { scrollYProgress: MotionValue<numb
           </span>
         </div>
       </div>
+      </motion.div>
     </motion.section>
   )
 }

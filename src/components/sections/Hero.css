@@ -180,7 +180,10 @@
 /* Responsive */
 @media (max-width: 768px) {
   .hero__title {
-    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-size: clamp(2.1rem, 9vw, 3.5rem);
+    word-break: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
   }
 
   .btn-primary, .btn-ghost {

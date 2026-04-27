@@ -3,6 +3,8 @@ import { motion, useTransform, useMotionValue, MotionValue } from 'framer-motion
 import { ArrowDown, Github, Linkedin, Mail } from 'lucide-react'
 import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
 import { FigmaSelectableBlock } from '../ui/FigmaSelectableBlock'
+import { useSectionScroll } from '../../hooks/useSectionScroll'
+import { useSectionTransition } from '../../hooks/useSectionTransition'
 import './Hero.css'
 
 const TYPED_WORDS = ['Desenvolvedor', 'Consultora', 'Criador', 'Estrategista']
@@ -65,12 +67,16 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
   const ctaGroupRef = useRef<HTMLDivElement>(null)
   const socialsGroupRef = useRef<HTMLDivElement>(null)
 
-  // ── Visibility / Pointer Events ───────────────────────────
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.1, 0.2], [1, 1, 0])
-  const heroPointerEvents = useTransform(scrollYProgress, (v) => (v < 0.15 ? 'auto' : 'none'))
+  // ── Wrapper transition (controlled by scrollStore) ────────
+  const { opacity: wrapperOpacity, y: wrapperY, pointerEvents: wrapperPointerEvents } = useSectionTransition('hero')
+
+  // ── Internal animations (still driven by scrollYProgress) ─
   const ctaOpacity = useTransform(scrollYProgress, [0, 0.1, 0.18], [1, 1, 0])
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0])
   const exitX = useTransform(scrollYProgress, [0, 0.2], [0, 80])
+
+  // Hook for internal scrolling
+  const { ref: scrollRef, y: scrollY } = useSectionScroll(scrollYProgress, [0, 0.1])
 
   // ── FigmaSelectableBlock states ───────────────────────────
   const [ctaVisible, setCtaVisible] = useState(true)
@@ -296,17 +302,20 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
 
       {/* ── Hero Section ─────────────────────────────────────── */}
       <motion.section
-        className="hero"
+        className="hero section"
         id="hero"
+        data-section="hero"
         ref={sectionRef}
         style={{
           position: 'absolute',
           inset: 0,
-          opacity: heroOpacity,
-          pointerEvents: heroPointerEvents as any,
+          opacity: wrapperOpacity,
+          y: wrapperY,
+          pointerEvents: wrapperPointerEvents,
         }}
       >
-        <div className="hero__content container">
+        <motion.div ref={scrollRef} style={{ y: scrollY, width: '100%', pointerEvents: 'none' }}>
+        <div className="hero__content container" style={{ pointerEvents: 'auto' }}>
 
           {/* Tagline — deleta no scroll */}
           <motion.div
@@ -414,7 +423,7 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
-            style={{ opacity: heroOpacity, x: exitX }}
+            style={{ opacity: ctaOpacity, x: exitX }}
           >
             <FigmaSelectableBlock
               isActive={socialsActive}
@@ -440,6 +449,7 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
             </FigmaSelectableBlock>
           </motion.div>
         </div>
+        </motion.div>
 
         {/* Scroll Indicator */}
         <motion.div

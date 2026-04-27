@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { motion, AnimatePresence, useTransform, MotionValue } from 'framer-motion'
+import { motion, AnimatePresence, MotionValue } from 'framer-motion'
 import { ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react'
 import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
+import { useSectionScroll } from '../../hooks/useSectionScroll'
+import { useSectionTransition } from '../../hooks/useSectionTransition'
 import './Projetos.css'
 
 const PROJECTS = [
@@ -61,13 +63,11 @@ export function Projetos({ scrollYProgress }: { scrollYProgress: MotionValue<num
     setActiveIndex(prev => (prev + dir + PROJECTS.length) % PROJECTS.length)
   }
 
-  // -- VISIBILITY & POINTER EVENTS --
-  // Active segment centered at 0.75. 
-  // Enters: 0.62 -> 0.68
-  // Plateau: 0.68 -> 0.82 (Snap point at 0.75)
-  // Exits: 0.82 -> 0.88
-  const sectionOpacity = useTransform(scrollYProgress, [0.62, 0.68, 0.82, 0.88], [0, 1, 1, 0])
-  const sectionPointerEvents = useTransform(scrollYProgress, (v) => (v > 0.65 && v < 0.85) ? 'auto' : 'none')
+  // ── Wrapper transition (controlled by scrollStore) ────────
+  const { opacity: wrapperOpacity, y: wrapperY, pointerEvents: wrapperPointerEvents } = useSectionTransition('projetos')
+
+  // Hook for internal scrolling
+  const { ref: scrollRef, y: scrollY } = useSectionScroll(scrollYProgress, [0.68, 0.82])
 
   const slideVariants = {
     enter: (dir: number) => ({
@@ -87,15 +87,18 @@ export function Projetos({ scrollYProgress }: { scrollYProgress: MotionValue<num
     <motion.section 
       className="projetos section" 
       id="projetos" 
+      data-section="projetos"
       style={{ 
         position: 'absolute', 
         inset: 0, 
-        opacity: sectionOpacity, 
-        pointerEvents: sectionPointerEvents as any
+        opacity: wrapperOpacity, 
+        y: wrapperY,
+        pointerEvents: wrapperPointerEvents 
       }}
     >
-      <div className="container" style={{ pointerEvents: 'auto' }}>
-        <div className="projetos__header">
+      <motion.div ref={scrollRef} style={{ y: scrollY, width: '100%' }}>
+        <div className="container" style={{ pointerEvents: 'auto' }}>
+          <div className="projetos__header">
           <div className="section-label">Portfólio</div>
           <h2 className="projetos__title">
             <TypewriterTextScroll
@@ -262,7 +265,8 @@ export function Projetos({ scrollYProgress }: { scrollYProgress: MotionValue<num
             </button>
           ))}
         </div>
-      </div>
+        </div>
+      </motion.div>
     </motion.section>
   )
 }

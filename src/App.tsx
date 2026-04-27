@@ -12,6 +12,8 @@ import { Contato } from './components/sections/Contato'
 import { Loader } from './components/ui/Loader'
 import { useLenis } from './hooks/useLenis'
 import { useScrollProgress } from './hooks/useScrollProgress'
+import { useScrollMachine } from './hooks/useScrollMachine'
+import { useSimulatedScroll } from './hooks/useSimulatedScroll'
 
 function CursorDot() {
   const dotRef = useRef<HTMLDivElement>(null)
@@ -68,31 +70,16 @@ export default function App() {
 
   useLenis()
   useScrollProgress()
+  useScrollMachine()
 
-  const trackRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ["start start", "end end"]
-  })
+  const { scrollY } = useScroll()
 
-  // GSAP Snapping
-  useEffect(() => {
-    if (!trackRef.current) return
-
-    const st = ScrollTrigger.create({
-      trigger: trackRef.current,
-      start: "top top",
-      end: "bottom bottom",
-      snap: {
-        snapTo: [0, 0.25, 0.5, 0.75, 1], // 5 sections = 4 intervals
-        duration: { min: 0.5, max: 0.8 },
-        delay: 0.1,
-        ease: "power2.inOut"
-      }
-    })
-
-    return () => st.kill()
-  }, [])
+  // Simulate old 500vh global progression for each section, perfectly scaled to dynamic DOM heights
+  const heroP = useSimulatedScroll(scrollY, 'hero', 0, 0.20)
+  const sobreP = useSimulatedScroll(scrollY, 'sobre', 0.12, 0.38)
+  const servicosP = useSimulatedScroll(scrollY, 'servicos', 0.37, 0.63)
+  const projetosP = useSimulatedScroll(scrollY, 'projetos', 0.62, 0.88)
+  const contatoP = useSimulatedScroll(scrollY, 'contato', 0.87, 1.0)
 
   return (
     <>
@@ -112,14 +99,14 @@ export default function App() {
       <Navbar />
 
       <main>
-        {/* Full Single Screen Track For Every Section */}
-        <div ref={trackRef} style={{ height: '500vh', position: 'relative' }}>
+        {/* Full Single Screen Track For Every Section mapped in Pixels */}
+        <div id="magnetic-scroll-track" style={{ position: 'relative' }}>
           <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' }} className="scroll-viewport">
-            <Hero scrollYProgress={scrollYProgress} />
-            <Sobre scrollYProgress={scrollYProgress} />
-            <Servicos scrollYProgress={scrollYProgress} />
-            <Projetos scrollYProgress={scrollYProgress} />
-            <Contato scrollYProgress={scrollYProgress} />
+            <Hero scrollYProgress={heroP} />
+            <Sobre scrollYProgress={sobreP} />
+            <Servicos scrollYProgress={servicosP} />
+            <Projetos scrollYProgress={projetosP} />
+            <Contato scrollYProgress={contatoP} />
           </div>
         </div>
       </main>

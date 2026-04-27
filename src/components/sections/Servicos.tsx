@@ -2,6 +2,8 @@ import { useRef } from 'react'
 import { motion, useTransform, MotionValue } from 'framer-motion'
 import { Globe, Smartphone, Database, Layers, BarChart, Shield } from 'lucide-react'
 import { TypewriterTextScroll } from '../animations/ScrollTypewriter'
+import { useSectionScroll } from '../../hooks/useSectionScroll'
+import { useSectionTransition } from '../../hooks/useSectionTransition'
 import './Servicos.css'
 
 const SERVICES = [
@@ -58,28 +60,29 @@ const SERVICES = [
 export function Servicos({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const sectionRef = useRef<HTMLElement>(null)
   
-  // -- VISIBILITY & POINTER EVENTS --
-  // Active segment centered at 0.50. 
-  // Enters: 0.37 -> 0.43
-  // Plateau: 0.43 -> 0.57 (Snap point at 0.50)
-  // Exits: 0.57 -> 0.63
-  const sectionOpacity = useTransform(scrollYProgress, [0.37, 0.43, 0.57, 0.63], [0, 1, 1, 0])
-  const sectionPointerEvents = useTransform(scrollYProgress, (v) => (v > 0.40 && v < 0.60) ? 'auto' : 'none')
+  // ── Wrapper transition (controlled by scrollStore) ────────
+  const { opacity: wrapperOpacity, y: wrapperY, pointerEvents: wrapperPointerEvents } = useSectionTransition('servicos')
+
+  // Hook for internal scrolling
+  const { ref: scrollRef, y: scrollY } = useSectionScroll(scrollYProgress, [0.43, 0.57])
 
   return (
     <motion.section 
       className="servicos section" 
       id="servicos" 
+      data-section="servicos"
       ref={sectionRef}
       style={{ 
         position: 'absolute', 
         inset: 0, 
-        opacity: sectionOpacity, 
-        pointerEvents: sectionPointerEvents as any
+        opacity: wrapperOpacity, 
+        y: wrapperY,
+        pointerEvents: wrapperPointerEvents
       }}
     >
-      <div className="container" style={{ pointerEvents: 'auto' }}>
-        <motion.div className="section-label">
+      <motion.div ref={scrollRef} style={{ y: scrollY, width: '100%' }}>
+        <div className="container" style={{ pointerEvents: 'auto' }}>
+          <motion.div className="section-label">
           O que faço
         </motion.div>
 
@@ -124,9 +127,10 @@ export function Servicos({ scrollYProgress }: { scrollYProgress: MotionValue<num
             const cardY = useTransform(scrollYProgress, [0.45 + (i * 0.01), 0.5 + (i * 0.01), 0.57, 0.63], [40, 0, 0, 40])
             return <ServiceCard key={service.id} service={service} style={{ opacity: cardOpacity, y: cardY }} />
           })}
+          </div>
         </div>
-      </div>
-    </motion.section>
+      </motion.div>
+    </motion.section>  
   )
 }
 

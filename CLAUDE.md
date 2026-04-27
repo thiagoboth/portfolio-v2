@@ -1,0 +1,46 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+```bash
+npm run dev       # start Vite dev server
+npm run build     # TypeScript check + Vite build
+npm run lint      # ESLint
+npm run preview   # preview production build
+```
+
+## Tech Stack
+
+React 19, TypeScript, Vite 6, Framer Motion, GSAP + ScrollTrigger, Lenis smooth scroll, Three.js / React Three Fiber, Zustand, Lucide React.
+
+## Architecture
+
+Single-page portfolio with 5 scroll-based sections: **Hero → Sobre → Serviços → Projetos → Contato**.
+
+### Magnetic Snap Scroll System
+
+The core scroll mechanic is a **sticky viewport + overlapping sections** pattern spread across several files — understanding all of them together is required to modify scroll behavior:
+
+- **`src/store/`** — Zustand `scrollStore` is the central source of truth: scroll phase (`IDLE | READING | TRANSITIONING`), per-section DOM metrics, active section index, and transition progress split as `outProgress` / `inProgress` at the 50% midpoint.
+- **`src/hooks/useLenis.ts`** — Initializes Lenis smooth scroll, integrates it with the GSAP ticker (`gsap.ticker.add`), and exposes the `lenis` instance globally so other hooks can call `lenis.scrollTo`.
+- **`src/hooks/useScrollMachine.ts`** — The snap engine. Uses a `ResizeObserver` to track live section heights and builds a scroll track where sections overlap by ~300px (transition zones). When scroll velocity approaches zero inside a transition zone, it auto-snaps forward (if >30% threshold crossed) or rolls back. Updates `scrollStore` on every frame.
+- **`src/hooks/useSectionTransition.ts`** — Consumes `scrollStore` state and returns per-section `{ opacity, y, pointerEvents }` values that sections apply via inline styles to animate in/out during transitions.
+- **`src/hooks/useSimulatedScroll.ts`** — Maps raw `scrollY` pixels to legacy 0–1 progress ranges per section (used by older animation code that predates the scroll machine).
+
+### Section & Component Layout
+
+```
+src/
+├── components/
+│   ├── sections/       # Hero, Sobre, Servicos, Projetos, Contato
+│   ├── layout/         # Navbar (theme toggle, mobile menu, active section highlight)
+│   ├── animations/     # ParticlesBg (canvas physics), ScrollTypewriter
+│   └── ui/             # Loader (Framer Motion AnimatePresence), FigmaSelectableBlock
+├── hooks/              # scroll machine, lenis, theme, section helpers
+├── store/              # Zustand scrollStore
+└── styles/             # globals.css
+```
+
+`src/App.tsx` is the composition root — it mounts all sections and wires the scroll hooks.

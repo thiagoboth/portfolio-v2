@@ -2,10 +2,17 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import './Loader.css'
 
+import { waitForLenis } from '../../hooks/useScrollMachine'
+
 export function Loader() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    // Lock scroll while loading
+    const cancelWait = waitForLenis((lenis) => {
+      lenis.stop()
+    })
+
     // Animate progress from 0 to 100% over the loader duration
     const duration = 2200 // 2.2s for the progress bar to fill
     const intervalTime = 20
@@ -22,7 +29,14 @@ export function Loader() {
       }
     }, intervalTime)
 
-    return () => clearInterval(intervalId)
+    return () => {
+      clearInterval(intervalId)
+      // Unlock scroll when loader unmounts
+      cancelWait()
+      waitForLenis((lenis) => {
+        lenis.start()
+      })
+    }
   }, [])
 
   return (
