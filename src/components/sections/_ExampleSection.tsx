@@ -60,8 +60,8 @@ import { useMotionValue as mv, useTransform as ut } from 'framer-motion'
 export function ExampleWithMotionValue() {
   // 1. Leia do Zustand como MotionValue customizado
   const rawProgress = useScrollStore(s => s.outProgress)
-  const progress = mv()
-  progress.set(rawProgress) // sincroniza a cada render
+  const progress = mv(rawProgress)
+  progress.set(rawProgress)
 
   const opacity    = ut(progress, [0, 1], [1, 0])
   const translateY = ut(progress, [0, 1], [0, -60])
