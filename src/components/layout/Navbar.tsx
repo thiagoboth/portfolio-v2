@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Moon, Sun, Menu, X } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
+import { useScrollStore } from '../../store/scrollStore'
 import './Navbar.css'
 
 const NAV_LINKS = [
@@ -11,53 +12,46 @@ const NAV_LINKS = [
   { label: 'Contato', href: '#contato' },
 ]
 
+const SECTION_IDS = ['hero', 'sobre', 'servicos', 'projetos', 'contato']
+
 export function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('hero')
+
+  // Reads active section directly from the scroll machine's source of truth
+  const activeSectionId = useScrollStore(s => s.activeSectionId)
+  const sections = useScrollStore(s => s.sections)
 
   useEffect(() => {
-    const onScroll = () => {
-      const scrollY = window.scrollY
-      setScrolled(scrollY > 40)
-      
-      const vh = window.innerHeight
-      if (scrollY < vh * 0.5) {
-        setActiveSection('hero')
-      } else if (scrollY < vh * 1.5) {
-        setActiveSection('sobre')
-      } else if (scrollY < vh * 2.5) {
-        setActiveSection('servicos')
-      } else if (scrollY < vh * 3.5) {
-        setActiveSection('projetos')
-      } else {
-        setActiveSection('contato')
-      }
-    }
+    const onScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', onScroll, { passive: true })
-    
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-    }
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   const handleNav = (href: string) => {
     setMenuOpen(false)
-    const vh = window.innerHeight
+    const sectionId = href.slice(1)
+    const idx = SECTION_IDS.indexOf(sectionId)
+
+    // The correct snap target for section[idx] is sections[idx-1].bottom:
+    // that's the pixel where the previous section finishes its transition zone
+    // and the next one becomes fully visible and stable (no crossfade).
     let targetScroll = 0
-    
-    switch (href) {
-      case '#hero': targetScroll = 0; break;
-      case '#sobre': targetScroll = vh * 1; break; // 100vh => progress 0.25
-      case '#servicos': targetScroll = vh * 2; break; // 200vh => progress 0.50
-      case '#projetos': targetScroll = vh * 3; break; // 300vh => progress 0.75
-      case '#contato': targetScroll = vh * 4; break; // 400vh => progress 1.00
+    if (idx > 0 && sections.length > 0) {
+      targetScroll = sections[idx - 1]?.bottom ?? 0
     }
 
-    // Small timeout to allow menu close animation
     setTimeout(() => {
-      window.scrollTo({ top: targetScroll, behavior: 'smooth' })
+      const lenis = (window as any).lenis
+      if (lenis) {
+        lenis.scrollTo(targetScroll, {
+          duration: 1.0,
+          easing: (t: number) => 1 - Math.pow(1 - t, 4),
+        })
+      } else {
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' })
+      }
     }, 50)
   }
 
@@ -73,7 +67,7 @@ export function Navbar() {
           {NAV_LINKS.map(link => (
             <li key={link.href}>
               <button
-                className={`navbar__link ${activeSection === link.href.slice(1) ? 'navbar__link--active' : ''}`}
+                className={`navbar__link ${activeSectionId === link.href.slice(1) ? 'navbar__link--active' : ''}`}
                 onClick={() => handleNav(link.href)}
               >
                 {link.label}

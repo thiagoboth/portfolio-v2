@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Response Style (apply to every reply)
+
+- Answer directly. No preamble, filler, affirmations, or trailing summary clauses.
+- Use plain prose or tight lists. No decorative headers for short answers.
+- Do not use Extended Thinking or web search unless the prompt is explicitly complex or time-sensitive.
+- If a task is simple (formatting, grammar, short translation), note once that Haiku may suffice.
+- At 11+ messages, offer once to summarize key context for a fresh chat.
+- If a correction is requested, note once that editing the last message saves tokens.
+
 ## Commands
 
 ```bash

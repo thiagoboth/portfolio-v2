@@ -117,11 +117,25 @@ export function useScrollMachine() {
   useEffect(() => {
     const cancelWait = waitForLenis((lenis) => {
       let snapTimer: ReturnType<typeof setTimeout> | null = null
+      let lastVelocity = 0
 
-      const triggerSnap = (progress: number, activeSec: SectionMetrics) => {
+      const triggerSnap = (progress: number, activeSec: SectionMetrics, velocity: number) => {
         const { state, setState, getNextSection, getPrevSection } = useScrollStore.getState()
         if (state === 'TRANSITIONING') return
         setState('TRANSITIONING')
+
+        // Scrolling backward — always return to the previous section
+        if (velocity < 0) {
+          const prevSec = getPrevSection(activeSec.id)
+          const backwardTarget = prevSec ? prevSec.bottom : activeSec.top
+          lenis.scrollTo(backwardTarget, {
+            duration  : 0.6,
+            lock      : true,
+            easing    : (t: number) => 1 - Math.pow(1 - t, 3),
+            onComplete: () => useScrollStore.getState().setState('READING'),
+          })
+          return
+        }
 
         if (progress >= SNAP_THRESHOLD) {
           const nextSec = getNextSection(activeSec.id)
@@ -170,22 +184,7 @@ export function useScrollMachine() {
 
         // ── FREE SCROLL ZONE: between top and transitionStart ──
         if (scrollY <= activeSec.transitionStart) {
-          if (activeSec.id === 'hero' && scrollY > 0) {
-            if (snapTimer) { clearTimeout(snapTimer) }
-            snapTimer = setTimeout(() => {
-              const currentScrollY = window.scrollY
-              if (currentScrollY > 0 && currentScrollY <= activeSec.transitionStart) {
-                lenis.scrollTo(0, {
-                  duration: 0.8,
-                  lock: true,
-                  easing: (t) => 1 - Math.pow(1 - t, 4),
-                  onComplete: () => useScrollStore.getState().setState('READING')
-                })
-              }
-            }, 150)
-          } else {
-            if (snapTimer) { clearTimeout(snapTimer); snapTimer = null }
-          }
+          if (snapTimer) { clearTimeout(snapTimer); snapTimer = null }
           setTransitionProgress(0)
           return
         }
@@ -193,6 +192,9 @@ export function useScrollMachine() {
         // ── TRANSITION ZONE ──────────────────────────────────────────────────
         const delta    = scrollY - activeSec.transitionStart
         const progress = Math.min(delta / TRANSITION_ZONE_PX, 1) // 0.0 → 1.0
+
+        // Track last known velocity so debounce path can read direction after scroll settles
+        lastVelocity = velocity
 
         // Publish progress every frame so section components can drive animations.
         // This runs even during TRANSITIONING so the snap plays out smoothly.
@@ -203,7 +205,7 @@ export function useScrollMachine() {
         // ── SNAP DETECTION: immediate path for touch/trackpad (gradual velocity decay) ──
         if (Math.abs(velocity) < VELOCITY_THRESHOLD) {
           if (snapTimer) { clearTimeout(snapTimer); snapTimer = null }
-          triggerSnap(progress, activeSec)
+          triggerSnap(progress, activeSec, lastVelocity)
           return
         }
 
@@ -221,7 +223,7 @@ export function useScrollMachine() {
           const currentSec      = secs.find(sec => currentScrollY >= sec.top && currentScrollY < sec.bottom)
           if (!currentSec || currentScrollY <= currentSec.transitionStart) return
           const currentProgress = Math.min((currentScrollY - currentSec.transitionStart) / TRANSITION_ZONE_PX, 1)
-          triggerSnap(currentProgress, currentSec)
+          triggerSnap(currentProgress, currentSec, lastVelocity)
         }, 150)
       }
 
