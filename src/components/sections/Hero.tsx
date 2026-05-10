@@ -7,7 +7,7 @@ import { useSectionScroll } from '../../hooks/useSectionScroll'
 import { useSectionTransition } from '../../hooks/useSectionTransition'
 import './Hero.css'
 
-const TYPED_WORDS = ['Desenvolvedor', 'Consultora', 'Criador', 'Estrategista']
+const TYPED_WORDS = ['Desenvolvedor', 'Analista', 'Designer']
 
 /* ── Easing / Math ─────────────────────────────────────────── */
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -315,140 +315,140 @@ export function Hero({ scrollYProgress }: { scrollYProgress: MotionValue<number>
         }}
       >
         <motion.div ref={scrollRef} style={{ y: scrollY, width: '100%', pointerEvents: 'none' }}>
-        <div className="hero__content container" style={{ pointerEvents: 'auto' }}>
+          <div className="hero__content container" style={{ pointerEvents: 'auto' }}>
 
-          {/* Tagline — deleta no scroll */}
-          <motion.div
-            className="hero__tagline"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            style={{ x: exitX }}
-          >
-            <span className="section-label mono">
-              <TypewriterTextScroll
-                text="Olá, sou Thiago Botelho"
-                scrollYProgress={scrollYProgress}
-                range={[0.07, 0.01]}
-                hideCursorOnDone
-              />
-            </span>
-          </motion.div>
-
-          {/* Título Principal — mantido */}
-          <motion.h1
-            className="hero__title"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            style={{ x: exitX }}
-          >
-            <span className="gradient-text">
-              <span ref={wordRef}>Desenvolvedor</span>
-            </span>
-            <br />
-            <span>
-              <TypewriterTextScroll
-                text="& Consultor"
-                scrollYProgress={scrollYProgress}
-                range={[0.1, 0.02]}
-                hideCursorOnDone
-              />
-            </span>
-            <br />
-            <span className="hero__title-outline">
-              <TypewriterTextScroll
-                text="Tecnológico"
-                scrollYProgress={scrollYProgress}
-                range={[0.15, 0.05]}
-                hideCursorOnDone
-              />
-            </span>
-          </motion.h1>
-
-          {/* Subtitle — deleta no scroll */}
-          <motion.div
-            className="hero__subtitle"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.7 }}
-            style={{ x: exitX }}
-          >
-            <TypewriterTextScroll
-              text="Soluções completas para transformar seu negócio através da tecnologia. Design + Desenvolvimento + Estratégia."
-              scrollYProgress={scrollYProgress}
-              range={[0.2, 0.08]}
-              isBlock
-              hideCursorOnDone
-            />
-          </motion.div>
-
-          {/* CTAs — Figma Selectable */}
-          <motion.div
-            className="hero__cta-outer"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            style={{ opacity: ctaOpacity, x: exitX }}
-          >
-            <FigmaSelectableBlock
-              isActive={ctaActive}
-              visible={ctaVisible}
-              trashHovered={ctaTrashHovered}
-              trashClicked={ctaTrashClicked}
-              onDelete={() => setCtaVisible(false)}
+            {/* Tagline — deleta no scroll */}
+            <motion.div
+              className="hero__tagline"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ x: exitX }}
             >
-              <div className="hero__cta" ref={ctaGroupRef}>
-                <button
-                  className="btn-primary"
-                  id="hero-cta-projetos"
-                  onClick={() => document.getElementById('projetos')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Ver Projetos
-                </button>
-                <button
-                  className="btn-ghost"
-                  id="hero-cta-contato"
-                  onClick={() => document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Entre em Contato
-                </button>
-              </div>
-            </FigmaSelectableBlock>
-          </motion.div>
+              <span className="section-label mono">
+                <TypewriterTextScroll
+                  text="Olá, sou Thiago Botelho"
+                  scrollYProgress={scrollYProgress}
+                  range={[0.07, 0.01]}
+                  hideCursorOnDone
+                />
+              </span>
+            </motion.div>
 
-          {/* Social Links — Figma Selectable */}
-          <motion.div
-            className="hero__socials-outer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.3 }}
-            style={{ opacity: ctaOpacity, x: exitX }}
-          >
-            <FigmaSelectableBlock
-              isActive={socialsActive}
-              visible={socialsVisible}
-              trashHovered={socialsTrashHovered}
-              trashClicked={socialsTrashClicked}
-              onDelete={() => setSocialsVisible(false)}
+            {/* Título Principal — mantido */}
+            <motion.h1
+              className="hero__title"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              style={{ x: exitX }}
             >
-              <div className="hero__socials" ref={socialsGroupRef}>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer"
-                  className="social-link" id="hero-social-github" aria-label="GitHub">
-                  <Github size={20} />
-                </a>
-                <a href="https://www.linkedin.com/in/thiago-botelho-6a255b205/" target="_blank" rel="noopener noreferrer"
-                  className="social-link" id="hero-social-linkedin" aria-label="LinkedIn">
-                  <Linkedin size={20} />
-                </a>
-                <a href="mailto:thiagobotelho.dev@gmail.com"
-                  className="social-link" id="hero-social-email" aria-label="Email">
-                  <Mail size={20} />
-                </a>
-              </div>
-            </FigmaSelectableBlock>
-          </motion.div>
-        </div>
+              <span className="gradient-text">
+                <span ref={wordRef}>Desenvolvedor</span>
+              </span>
+              <br />
+              <span>
+                <TypewriterTextScroll
+                  text="& Consultor"
+                  scrollYProgress={scrollYProgress}
+                  range={[0.1, 0.02]}
+                  hideCursorOnDone
+                />
+              </span>
+              <br />
+              <span className="hero__title-outline">
+                <TypewriterTextScroll
+                  text="Tecnológico"
+                  scrollYProgress={scrollYProgress}
+                  range={[0.15, 0.05]}
+                  hideCursorOnDone
+                />
+              </span>
+            </motion.h1>
+
+            {/* Subtitle — deleta no scroll */}
+            <motion.div
+              className="hero__subtitle"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.7 }}
+              style={{ x: exitX }}
+            >
+              <TypewriterTextScroll
+                text="Soluções completas para transformar seu negócio através da tecnologia. Design + Desenvolvimento + Estratégia."
+                scrollYProgress={scrollYProgress}
+                range={[0.2, 0.08]}
+                isBlock
+                hideCursorOnDone
+              />
+            </motion.div>
+
+            {/* CTAs — Figma Selectable */}
+            <motion.div
+              className="hero__cta-outer"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              style={{ opacity: ctaOpacity, x: exitX }}
+            >
+              <FigmaSelectableBlock
+                isActive={ctaActive}
+                visible={ctaVisible}
+                trashHovered={ctaTrashHovered}
+                trashClicked={ctaTrashClicked}
+                onDelete={() => setCtaVisible(false)}
+              >
+                <div className="hero__cta" ref={ctaGroupRef}>
+                  <button
+                    className="btn-primary"
+                    id="hero-cta-projetos"
+                    onClick={() => document.getElementById('projetos')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Ver Projetos
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    id="hero-cta-contato"
+                    onClick={() => document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Entre em Contato
+                  </button>
+                </div>
+              </FigmaSelectableBlock>
+            </motion.div>
+
+            {/* Social Links — Figma Selectable */}
+            <motion.div
+              className="hero__socials-outer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.3 }}
+              style={{ opacity: ctaOpacity, x: exitX }}
+            >
+              <FigmaSelectableBlock
+                isActive={socialsActive}
+                visible={socialsVisible}
+                trashHovered={socialsTrashHovered}
+                trashClicked={socialsTrashClicked}
+                onDelete={() => setSocialsVisible(false)}
+              >
+                <div className="hero__socials" ref={socialsGroupRef}>
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+                    className="social-link" id="hero-social-github" aria-label="GitHub">
+                    <Github size={20} />
+                  </a>
+                  <a href="https://www.linkedin.com/in/thiago-botelho-6a255b205/" target="_blank" rel="noopener noreferrer"
+                    className="social-link" id="hero-social-linkedin" aria-label="LinkedIn">
+                    <Linkedin size={20} />
+                  </a>
+                  <a href="mailto:thiagobotelho.dev@gmail.com"
+                    className="social-link" id="hero-social-email" aria-label="Email">
+                    <Mail size={20} />
+                  </a>
+                </div>
+              </FigmaSelectableBlock>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Scroll Indicator */}
